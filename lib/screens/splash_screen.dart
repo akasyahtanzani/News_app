@@ -10,112 +10,89 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> 
- with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
 
-  @override 
+  @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      duration: Duration(seconds: 2),
-      vsync: this
+
+    _controller = AnimationController(
+      duration: const Duration(seconds: 3),
+      vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _fadeAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.0, 0.7, curve: Curves.easeInOut),
+    );
 
-    _scaleAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.elasticInOut,
-    ));
+    _scaleAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.3, 1.0, curve: Curves.elasticOut),
+    );
 
-    _animationController.forward();
+    _controller.forward();
 
-    // navigate to home screen after 3 second
-    Future.delayed(Duration(seconds: 3), () {
-     Get.offAllNamed(Routes.HOME);
+    Future.delayed(const Duration(seconds: 3), () {
+      Get.offAllNamed(Routes.HOME);
     });
   }
 
   @override
   void dispose() {
-    _animationController.dispose();
+    _controller.dispose();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
     return Scaffold(
-      backgroundColor: AppColors.primary,
+      backgroundColor: AppColors.bidong,
       body: Center(
-        child: AnimatedBuilder(
-          animation: _animationController,
-          builder: (context, child) {
-            return FadeTransition(
-              opacity: _fadeAnimation,
-              child: ScaleTransition(
-                scale: _scaleAnimation,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.2),
-                            blurRadius: 20,
-                            offset: Offset(0, 10)
-                          )
-                        ]
-                      ),
-                    child: Icon(
-                      Icons.newspaper,
-                      size: 60,
-                      color: AppColors.primary,
-                    ),
-                    ),
-                  SizedBox(height: 30),
-                  Text(
-                    'News App',
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      letterSpacing: 1.5 
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    'stay update with Latest News',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.white.withValues(alpha: 0.8)
-                    ),
-                  ),
-                     SizedBox(height: 50),
-                    CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  ],
+        child: FadeTransition(
+          opacity: _fadeAnimation,
+          child: ScaleTransition(
+            scale: _scaleAnimation,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(
+                  'assets/images/LOGO.png',
+                  width: size.width * 0.65,
+                  height: size.width * 0.65,
                 ),
-              ),
-            );
-          },
+                const SizedBox(height: 10),
+
+                const Text(
+                  "Newsify",
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: 70,
+                  height: 4,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: LinearProgressIndicator(
+                      color: Colors.white,
+                      backgroundColor: Colors.white24,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

@@ -81,4 +81,10 @@ Future<void>searchNews(String query) async{
     _isLoading.value= false;
   }
 }
+
+var selectedTabIndex = 0.obs;
+
+  void onTabTapped(int index) {
+    selectedTabIndex.value = index;
+  }
 }

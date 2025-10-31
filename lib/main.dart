@@ -6,16 +6,16 @@ import 'package:news/bindings/app_bindings.dart';
 import 'package:news/routes/app_pages.dart';
 import 'package:news/utils/app_colors.dart';
 
-void main() async {  //pemanggilan data namanya async  
+void main() async {
+  //pemanggilan data namanya async
   WidgetsFlutterBinding.ensureInitialized();
 
   //load environtment variables first before running the app
-  await dotenv.load(fileName: '.env');   // untuk menstrukkan file env agar mudah di kelola, maknaya di simpen di .env
-  
-  
+  await dotenv.load(
+    fileName: '.env',
+  ); // untuk menstrukkan file env agar mudah di kelola, maknaya di simpen di .env
   runApp(News());
 }
-
 
 class News extends StatelessWidget {
   const News({super.key});
@@ -28,23 +28,23 @@ class News extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
         primaryColor: AppColors.primary,
-        scaffoldBackgroundColor: AppColors.background,
+        scaffoldBackgroundColor: AppColors.bidong,
         appBarTheme: AppBarTheme(
-          backgroundColor: AppColors.primary,
+          backgroundColor: AppColors.bidong,
           foregroundColor: Colors.white,
           elevation: 0,
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary,
-            foregroundColor: Colors.white
-          )
-        )
+            foregroundColor: Colors.white,
+          ),
+        ),
       ),
       initialRoute: AppPages.INITIAL,
       getPages: AppPages.routes,
       initialBinding: AppBindings(),
       debugShowCheckedModeBanner: false,
-    ) ;  
+    );
   }
 }

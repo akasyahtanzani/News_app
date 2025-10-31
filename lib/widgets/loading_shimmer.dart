@@ -8,26 +8,22 @@ class LoadingShimmer extends StatefulWidget {
   State<LoadingShimmer> createState() => _LoadingShimmerState();
 }
 
-class _LoadingShimmerState extends State<LoadingShimmer> 
+class _LoadingShimmerState extends State<LoadingShimmer>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;
 
   @override
-  void initState()  {
+  void initState() {
     super.initState();
     _animationController = AnimationController(
-      duration: Duration(milliseconds: 1500), 
+      duration: Duration(milliseconds: 1500),
       vsync: this,
     )..repeat();
 
-    _animation = Tween<double>(
-      begin: -1.0,
-      end: 2.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _animation = Tween<double>(begin: -1.0, end: 2.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
   }
 
   @override
@@ -58,23 +54,23 @@ class _LoadingShimmerState extends State<LoadingShimmer>
                   return Container(
                     height: 200,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(12),
+                      ),
                       gradient: LinearGradient(
                         begin: Alignment.centerLeft,
                         end: Alignment.centerRight,
                         colors: [
                           AppColors.divider,
                           AppColors.divider,
-                          AppColors.divider
+                          AppColors.divider,
                         ],
                         // rotasi perputarannya brp detiknya setiap itunya
-                        stops: [
-                          0.0,
-                          0.5,
-                          1.0
-                        ],
-                        transform: GradientRotation(_animation.value * 3.14159) // agar mutarnya smooth
-                      )
+                        stops: [0.0, 0.5, 1.0],
+                        transform: GradientRotation(
+                          _animation.value * 3.14159,
+                        ), // agar mutarnya smooth
+                      ),
                     ),
                   );
                 },
@@ -93,18 +89,17 @@ class _LoadingShimmerState extends State<LoadingShimmer>
                           width: 100,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(6),
-                            color: AppColors.divider
+                            color: AppColors.divider,
                           ),
                         );
                       },
                     ),
                     SizedBox(height: 12),
-                    
 
                     // title shimer
                     AnimatedBuilder(
                       animation: _animation,
-                      builder: (context,child) {
+                      builder: (context, child) {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -113,7 +108,7 @@ class _LoadingShimmerState extends State<LoadingShimmer>
                               width: double.infinity,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(8),
-                                color: AppColors.divider
+                                color: AppColors.divider,
                               ),
                             ),
                             SizedBox(height: 8),
@@ -122,9 +117,9 @@ class _LoadingShimmerState extends State<LoadingShimmer>
                               width: MediaQuery.of(context).size.width * 0.7,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(8),
-                                color: AppColors.divider
+                                color: AppColors.divider,
                               ),
-                            )
+                            ),
                           ],
                         );
                       },
@@ -142,7 +137,7 @@ class _LoadingShimmerState extends State<LoadingShimmer>
                               width: double.infinity,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(7),
-                                color: AppColors.divider
+                                color: AppColors.divider,
                               ),
                             ),
                             SizedBox(height: 6),
@@ -151,16 +146,16 @@ class _LoadingShimmerState extends State<LoadingShimmer>
                               width: MediaQuery.of(context).size.width * 0.5,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(7),
-                                color: AppColors.divider
+                                color: AppColors.divider,
                               ),
-                            )
+                            ),
                           ],
                         );
                       },
-                    )
+                    ),
                   ],
                 ),
-              )
+              ),
             ],
           ),
         );

@@ -7,15 +7,25 @@ import 'package:news/utils/app_colors.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:news/controllers/favorite_controller.dart';
 
-class NewsDetailScreen extends StatelessWidget {
+class NewsDetailScreen extends StatefulWidget {
   final NewsArticles articles = Get.arguments as NewsArticles;
+  final FavoriteController favoriteController = Get.put(FavoriteController());
 
   NewsDetailScreen({super.key});
 
   @override
+  State<NewsDetailScreen> createState() => _NewsDetailScreenState();
+}
+
+class _NewsDetailScreenState extends State<NewsDetailScreen> {
+  bool isFavorite = false; // buat status favorit
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.bidong,
       // kalo kita pake customscrollview itu harus pake slivers, jadi kita bia custem sendiri
       body: CustomScrollView(
         slivers: [
@@ -23,15 +33,15 @@ class NewsDetailScreen extends StatelessWidget {
             expandedHeight: 300,
             pinned: true, // buat di scroll tapi ga ilang
             flexibleSpace: FlexibleSpaceBar(
-              background: articles.urlToImage != null
+              background: widget.articles.urlToImage != null
                   //membuat kompressati gambar -> size
                   ? CachedNetworkImage(
-                      imageUrl: articles.urlToImage!,
+                      imageUrl: widget.articles.urlToImage!,
                       // agar menutupi bagian semua dari app bar
                       fit: BoxFit.cover,
                       placeholder: (context, url) => Container(
                         color: AppColors.divider,
-                        child: Center(child: CircularProgressIndicator()),
+                        child: const Center(child: CircularProgressIndicator()),
                       ),
                       errorWidget: (context, url, error) => Container(
                         color: AppColors.divider,
@@ -56,191 +66,235 @@ class NewsDetailScreen extends StatelessWidget {
             ),
             actions: [
               IconButton(
-                icon: Icon(Icons.share),
-                onPressed:() => _shareArticle(), 
+                icon: Icon(
+                  isFavorite ? Icons.favorite : Icons.favorite_border,
+                  color: isFavorite ? Colors.red : Colors.white,
                 ),
-                PopupMenuButton(
-                  onSelected: (value) {
-                 switch (value) {
-                   case 'copy_link':
-                   _copyLink();
-                     break;
-                     case 'open_browser':
-                     _openInBrowser();
-                   break;
-                 }   
-                  },
+                onPressed: () {
+                  widget.favoriteController.toggleFavorite(widget.articles);
+                  final isFav = widget.favoriteController.isFavorite(
+                    widget.articles,
+                  );
+
+                  setState(() {
+                    isFavorite = isFav;
+                  });
+
+                  Get.snackbar(
+                    isFav
+                        ? 'Added to Favorites ❤️'
+                        : 'Removed from Favorites 🤍',
+                    widget.articles.title ?? '',
+                    snackPosition: SnackPosition.BOTTOM,
+                    duration: const Duration(seconds: 2),
+                  );
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.share),
+                onPressed: () => _shareArticle(),
+              ),
+              PopupMenuButton(
+                onSelected: (value) {
+                  switch (value) {
+                    case 'copy_link':
+                      _copyLink();
+                      break;
+                    case 'open_browser':
+                      _openInBrowser();
+                      break;
+                  }
+                },
                 itemBuilder: (context) => [
-                  PopupMenuItem(
+                  const PopupMenuItem(
                     value: 'copy_link',
                     child: Row(
                       children: [
                         Icon(Icons.copy),
-                        SizedBox(height: 8),
-                        Text('Copy_Link')
+                        SizedBox(width: 8),
+                        Text('Copy Link'),
                       ],
                     ),
                   ),
-                  PopupMenuItem(
-                    value: 'Open_browser',
+                  const PopupMenuItem(
+                    value: 'open_browser',
                     child: Row(
                       children: [
                         Icon(Icons.open_in_browser),
-                        SizedBox(height: 8),
-                        Text('Open in Browser')
+                        SizedBox(width: 8),
+                        Text('Open in Browser'),
                       ],
                     ),
-                  )
+                  ),
                 ],
-                )
+              ),
             ],
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.all(16),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                //source an ddate
-               Row(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  //source and date
+                  Row(
                     children: [
-                      if (articles.source?.name != null) ...[
+                      if (widget.articles.source?.name != null) ...[
                         Container(
-                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(4)
+                            color: AppColors.error,
+                            borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
-                            articles.source!.name!,
+                            widget.articles.source!.name!,
                             style: TextStyle(
-                              color: AppColors.primary,
+                              color: AppColors.background,
                               fontSize: 12,
-                              fontWeight: FontWeight.bold
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
-                        SizedBox(width: 12),
+                        const SizedBox(width: 12),
                       ],
-                      if (articles.publishedAt !=null) ...[
+                      if (widget.articles.publishedAt != null) ...[
                         Text(
-                          timeago.format(DateTime.parse(articles.publishedAt!)),
+                          timeago.format(
+                            DateTime.parse(widget.articles.publishedAt!),
+                          ),
                           style: TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 12
+                            color: AppColors.background,
+                            fontSize: 12,
                           ),
                         ),
-                      ]
+                      ],
                     ],
                   ),
-                 SizedBox(height: 16),
-                //title
-                if(articles.title !=null) ...[
-                  Text(
-                    articles.title!,
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textSecondary
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                ],
-                //description
-                if(articles.description !=null) ...[
-                  Text(
-                    articles.description!,
-                    style: TextStyle(
-                      fontSize: 16,
-                      height: 1.5
-                    )
-                  )
-                ],
-                SizedBox(height: 20),
-                //content
-                if(articles.content !=null) ...[
-                  Text(
-                    'content',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary
-                    ),
-                  ),
-                  SizedBox(height:8),
-                Text(
-                  articles.content!,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: AppColors.textPrimary,
-                    height: 1.6
-                  ),
-                ),
-                SizedBox(height: 24),
-                ],
-                //read full articles button
-                if(articles.url !=null) ...[
-                  SizedBox(width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _openInBrowser,
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      )
-                    ),
-                    child: Text(
-                      'read full articles',
+                  const SizedBox(height: 16),
+
+                  //title
+                  if (widget.articles.title != null) ...[
+                    Text(
+                      widget.articles.title!,
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.background,
                       ),
                     ),
-                  ),
-                  ),
-                  SizedBox(height: 32),
-                ]
-              ],
-              ) ,
+                    const SizedBox(height: 16),
+                  ],
+
+                  //description
+                  if (widget.articles.description != null) ...[
+                    Text(
+                      widget.articles.description!,
+                      style: const TextStyle(
+                        color: AppColors.background,
+                        fontSize: 16,
+                        height: 1.5,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 20),
+                  //content
+                  if (widget.articles.content != null) ...[
+                    const Text(
+                      'Content',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      widget.articles.content!,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: AppColors.background,
+                        height: 1.6,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+
+                  //read full articles button
+                  if (widget.articles.url != null) ...[
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _openInBrowser,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.error,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Read Full Article',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                            SizedBox(width: 6),
+                            Icon(
+                              Icons.open_in_new,
+                              size: 20,
+                              color: Colors.white,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                  ],
+                ],
+              ),
             ),
-          )
+          ),
         ],
       ),
     );
   }
 
   void _shareArticle() {
-    if (articles.url !=null) {
+    if (widget.articles.url != null) {
       Share.share(
-        '${articles.title ?? 'check out this news'}\n\n${articles.url!}',
-        subject: articles.title
+        '${widget.articles.title ?? 'Check out this news!'}\n\n${widget.articles.url!}',
+        subject: widget.articles.title,
       );
     }
   }
 
   void _copyLink() {
-    if (articles.url !=null ) {
-      Clipboard.setData(ClipboardData(text: articles.url!));
+    if (widget.articles.url != null) {
+      Clipboard.setData(ClipboardData(text: widget.articles.url!));
       Get.snackbar(
-        'Succes',
+        'Success',
         'Link copied to clipboard',
         snackPosition: SnackPosition.BOTTOM,
-        duration: Duration(seconds: 2)
+        duration: const Duration(seconds: 2),
       );
     }
   }
 
   void _openInBrowser() async {
-    if (articles.url !=null) {
-      // uri untuk parsing link agar di pahami sama aplikais lain
-      final Uri url = Uri.parse(articles.url!);
-      // proses menunggu apakah url valid dan bis di buka oleh browser
+    if (widget.articles.url != null) {
+      final Uri url = Uri.parse(widget.articles.url!);
       if (await canLaunchUrl(url)) {
-        //proses menunggu ketika url sudah valid dan sedang doi proses oleh browser, sampai datanya bisa di proses
         await launchUrl(url, mode: LaunchMode.externalApplication);
       } else {
         Get.snackbar(
           'Error',
           'Could not open the link',
-          snackPosition: SnackPosition.BOTTOM
+          snackPosition: SnackPosition.BOTTOM,
         );
       }
     }

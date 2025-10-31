@@ -1,4 +1,6 @@
 import 'package:get/get.dart';
+import 'package:news/bindings/home_bindings.dart';
+import 'package:news/screens/home_screen.dart';
 import 'package:news/screens/news_detail_screen.dart';
 import 'package:news/screens/splash_screen.dart';
 
@@ -16,7 +18,8 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.HOME,
-      page: () => SplashScreen(),
+      page: () => HomeScreen(),
+      binding: HomeBindings(),
     ),
     GetPage(
       name: _Paths.NEWS_DETAIL,

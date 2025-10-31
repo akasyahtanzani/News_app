@@ -9,7 +9,7 @@ class AppColors {
   static const Color onPrimary = Colors.white;
   static const Color onSecondary = Colors.black;
   static const Color onBackground = Color(0xFF121212);
-  static const Color onSurface = Color(0xFF121212);
+  static const Color onSurface = Color.fromARGB(0, 9, 34, 104);
   static const Color onError = Colors.white;
   
   // Text colors
@@ -19,5 +19,7 @@ class AppColors {
   
   // Additional colors
   static const Color divider = Color(0xFFE0E0E0);
-  static const Color cardShadow = Color(0x1A000000);
+  static const Color bidongs = Color.fromARGB(26, 9, 7, 134);
+  static const Color bidong = Color.fromARGB(255, 9, 34, 104);
+  
 }
